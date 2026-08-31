@@ -1,0 +1,12 @@
+services:
+  gmail-api:
+    build: .
+    ports:
+      - "4567:4567"
+    environment:
+      PORT: 4567
+      GMAIL_API_KEY: ${GMAIL_API_KEY:-}
+    volumes:
+      - gmail_api_storage:/app/storage
+volumes:
+  gmail_api_storage:

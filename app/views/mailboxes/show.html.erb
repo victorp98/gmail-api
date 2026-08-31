@@ -1,0 +1,22 @@
+<main class="shell">
+  <div class="topbar"><div><div class="eyebrow">Buzón simulado</div><h1><%= @mailbox.email %></h1><p class="muted">History ID <%= @mailbox.history_sequence %></p></div><%= link_to "Todos los buzones", root_path, class: "button secondary" %></div>
+  <div class="grid">
+    <section class="card pad">
+      <h2>Nuevo mensaje entrante</h2>
+      <%= form_with url: mailbox_messages_path(@mailbox.email) do %>
+        <label>De</label><%= email_field_tag :from, "cliente@example.com", required: true %>
+        <label>Asunto</label><%= text_field_tag :subject, "Consulta de prueba", required: true %>
+        <label>Mensaje</label><%= text_area_tag :body, "Hola, este correo fue generado localmente.", rows: 8, required: true %>
+        <div style="margin-top:16px"><%= submit_tag "Agregar al inbox", class: "button" %></div>
+      <% end %>
+    </section>
+    <section class="card">
+      <div class="pad"><h2>Mensajes</h2><p class="muted"><%= @messages.size %> almacenados</p></div>
+      <% if @messages.empty? %><div class="message muted">El buzón está vacío.</div><% else %>
+        <% @messages.each do |message| %><% mail = message.parsed_mail %>
+          <article class="message"><div class="message-head"><% message.labels.each do |label| %><span class="label <%= label.downcase %>"><%= label %></span><% end %><time><%= message.received_at.strftime("%d/%m/%Y %H:%M") %></time></div><h3 style="margin:12px 0 4px"><%= mail.subject %></h3><p class="muted" style="font-size:12px"><%= mail.from&.join(", ") %> → <%= mail.to&.join(", ") %></p><p style="white-space:pre-wrap"><%= truncate(mail.text_part&.body&.decoded || mail.body.decoded, length: 500) %></p><div class="raw-id"><%= message.external_id %> · <%= message.thread_id %></div></article>
+        <% end %>
+      <% end %>
+    </section>
+  </div>
+</main>

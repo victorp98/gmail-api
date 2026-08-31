@@ -1,0 +1,15 @@
+/.bundle
+/.env*
+!/.env.example
+/config/master.key
+/log/*
+!/log/.keep
+/storage/*
+!/storage/.keep
+/tmp/*
+!/tmp/.keep
+!/tmp/pids/
+/tmp/pids/*
+!/tmp/pids/.keep
+/public/assets
+/.DS_Store

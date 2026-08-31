@@ -1,0 +1,11 @@
+<main class="shell">
+  <div class="topbar"><div><div class="eyebrow">Local email infrastructure</div><h1>gmail-api</h1><p class="muted">API reutilizable para probar correo sin entregar mensajes a Internet.</p></div></div>
+  <section class="card">
+    <div class="pad"><h2>Buzones</h2><p class="muted">Un buzón se crea automáticamente con la primera llamada a la API.</p></div>
+    <% if @mailboxes.empty? %><div class="message muted">Todavía no hay buzones.</div><% else %>
+      <% @mailboxes.each do |mailbox| %>
+        <%= link_to mailbox_path(mailbox.email), class: "mailbox-link" do %><strong><%= mailbox.email %></strong><br><small class="muted"><%= mailbox.messages.count %> mensajes · history <%= mailbox.history_sequence %></small><% end %>
+      <% end %>
+    <% end %>
+  </section>
+</main>
