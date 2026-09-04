@@ -30,6 +30,8 @@ module Api
       def send_message
         raw = params[:raw].presence || MessageBuilder.call(**message_params.to_h.symbolize_keys)
         message = @mailbox.append_message!(raw: raw, labels: [ "SENT" ], thread_id: params[:thread_id])
+        LocalDelivery.call(sender_mailbox: @mailbox, raw: raw, thread_id: message.thread_id)
+
         render json: message.as_api_json(include_raw: true), status: :created
       end
 
