@@ -21,7 +21,7 @@ Mailbox email parameters must be URL encoded. Set `GMAIL_API_KEY` to require `Au
 ```bash
 curl -X POST http://localhost:4567/api/v1/mailboxes/support%40example.com/messages \
   -H 'Content-Type: application/json' \
-  -d '{"from":"customer@example.net","to":"support@example.com","subject":"Help","body":"Hello"}'
+  -d '{"from":"customer@example.net","to":"support@example.com","subject":"Help","body":"Hello","attachments":[{"filename":"document.pdf","content_type":"application/pdf","content_base64":"JVBERi0x..."}]}'
 
 curl 'http://localhost:4567/api/v1/mailboxes/support%40example.com/messages?label=INBOX'
 
@@ -39,6 +39,8 @@ Additional endpoints:
 - `DELETE /api/v1/mailboxes/:email/messages`
 
 This service never opens SMTP connections and never delivers messages externally.
+
+The mailbox browser accepts multiple files in incoming messages, outgoing messages and replies. JSON clients can send the same files through `attachments`, encoding each file in `content_base64`.
 
 ## GitHub
 

@@ -20,6 +20,27 @@ class MessagesApiTest < ActionDispatch::IntegrationTest
     assert_equal [ created["id"] ], response.parsed_body["messages"].map { |message| message["id"] }
   end
 
+  test "creates an inbox message with multiple attachments" do
+    post "#{@base}/messages", params: {
+      from: "customer@example.net",
+      to: @email,
+      subject: "Documents",
+      body: "Attached files",
+      attachments: [
+        { filename: "contract.pdf", content_type: "application/pdf", content_base64: Base64.strict_encode64("pdf-content") },
+        { filename: "identity.txt", content_type: "text/plain", content_base64: Base64.strict_encode64("document-content") }
+      ]
+    }, as: :json
+
+    assert_response :created
+    mail = Mail.read_from_string(response.parsed_body.fetch("raw"))
+    assert_equal "Attached files", mail.text_part.decoded
+    assert_equal(
+      { "contract.pdf" => "pdf-content", "identity.txt" => "document-content" },
+      mail.attachments.to_h { |attachment| [ attachment.filename, attachment.decoded ] }
+    )
+  end
+
   test "captures sent messages in an existing thread" do
     post "#{@base}/send", params: {
       from: @email, to: "customer@example.net", subject: "Re: Help", body: "Response", thread_id: "thread-existing"
@@ -99,6 +120,28 @@ class MessagesApiTest < ActionDispatch::IntegrationTest
     %w[customer@example.net other@example.net copy@example.net].each do |recipient|
       assert_equal [ "INBOX" ], Mailbox.find_by!(email: recipient).messages.sole.labels
     end
+  end
+
+  test "web mailbox can add multiple attachments to an incoming message" do
+    attachments = [
+      Rack::Test::UploadedFile.new(StringIO.new("first-document"), "application/pdf", original_filename: "first.pdf"),
+      Rack::Test::UploadedFile.new(StringIO.new("second-document"), "text/plain", original_filename: "second.txt")
+    ]
+
+    post mailbox_messages_path(@email), params: {
+      from: "customer@example.net",
+      subject: "Documents",
+      body: "Attached files",
+      attachments: attachments
+    }
+
+    assert_redirected_to mailbox_path(@email)
+    mail = Mailbox.find_by!(email: @email).messages.sole.parsed_mail
+    assert_equal "Attached files", mail.text_part.decoded
+    assert_equal(
+      { "first.pdf" => "first-document", "second.txt" => "second-document" },
+      mail.attachments.to_h { |attachment| [ attachment.filename, attachment.decoded ] }
+    )
   end
 
   test "web mailbox can reply in the same thread" do

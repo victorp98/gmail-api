@@ -59,7 +59,10 @@ module Api
       end
 
       def message_params
-        params.permit(:from, :subject, :body, :html_body, to: [], cc: []).tap do |permitted|
+        params.permit(
+          :from, :subject, :body, :html_body,
+          to: [], cc: [], attachments: [ :filename, :content_type, :content_base64 ]
+        ).tap do |permitted|
           permitted[:to] = params[:to] unless params[:to].is_a?(Array)
         end
       end

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0] - 2026-09-11
+
+### Added
+
+- Added multiple MIME attachments to incoming messages, outgoing messages and replies in the local mailbox UI.
+- Added base64-encoded attachments to the JSON API for document-ingestion tests.
+
 ## [0.1.0] - 2026-08-31
 
 ### Added

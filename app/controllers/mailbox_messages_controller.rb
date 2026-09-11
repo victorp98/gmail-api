@@ -5,7 +5,8 @@ class MailboxMessagesController < ApplicationController
       from: params.require(:from),
       to: mailbox.email,
       subject: params.require(:subject),
-      body: params.require(:body)
+      body: params.require(:body),
+      attachments: uploaded_attachments
     )
     mailbox.append_message!(raw: raw, labels: [ "INBOX" ])
     redirect_to mailbox_path(mailbox.email), notice: "Mensaje agregado al inbox."
@@ -18,7 +19,8 @@ class MailboxMessagesController < ApplicationController
       to: recipient_list(params.require(:to)),
       cc: recipient_list(params[:cc]),
       subject: params.require(:subject),
-      body: params.require(:body)
+      body: params.require(:body),
+      attachments: uploaded_attachments
     )
     message = mailbox.append_message!(raw: raw, labels: [ "SENT" ])
     LocalDelivery.call(sender_mailbox: mailbox, raw: raw, thread_id: message.thread_id)
@@ -33,7 +35,8 @@ class MailboxMessagesController < ApplicationController
       from: mailbox.email,
       to: reply_recipients(original),
       subject: reply_subject(original),
-      body: params.require(:body)
+      body: params.require(:body),
+      attachments: uploaded_attachments
     )
     message = mailbox.append_message!(raw: raw, labels: [ "SENT" ], thread_id: original.thread_id)
     LocalDelivery.call(sender_mailbox: mailbox, raw: raw, thread_id: message.thread_id)
@@ -45,6 +48,10 @@ class MailboxMessagesController < ApplicationController
 
   def recipient_list(value)
     value.to_s.split(/[,\s;]+/).map(&:strip).compact_blank
+  end
+
+  def uploaded_attachments
+    Array(params[:attachments]).compact_blank
   end
 
   def reply_recipients(message)

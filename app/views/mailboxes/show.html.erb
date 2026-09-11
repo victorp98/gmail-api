@@ -4,20 +4,22 @@
     <div class="stack">
       <section class="card pad">
         <h2>Nuevo mensaje entrante</h2>
-        <%= form_with url: mailbox_messages_path(@mailbox.email) do %>
+        <%= form_with url: mailbox_messages_path(@mailbox.email), html: { multipart: true } do %>
           <label>De</label><%= email_field_tag :from, "cliente@example.com", required: true %>
           <label>Asunto</label><%= text_field_tag :subject, "Consulta de prueba", required: true %>
           <label>Mensaje</label><%= text_area_tag :body, "Hola, este correo fue generado localmente.", rows: 8, required: true %>
+          <label>Documentos adjuntos</label><%= file_field_tag "attachments[]", multiple: true %>
           <div style="margin-top:16px"><%= submit_tag "Agregar al inbox", class: "button" %></div>
         <% end %>
       </section>
       <section class="card pad">
         <h2>Enviar desde este buzón</h2>
-        <%= form_with url: mailbox_send_message_path(@mailbox.email) do %>
+        <%= form_with url: mailbox_send_message_path(@mailbox.email), html: { multipart: true } do %>
           <label>Para</label><%= text_field_tag :to, "cliente@example.com", required: true, placeholder: "uno@example.com, dos@example.com" %>
           <label>CC</label><%= text_field_tag :cc, nil, placeholder: "opcional@example.com" %>
           <label>Asunto</label><%= text_field_tag :subject, "Respuesta de prueba", required: true %>
           <label>Mensaje</label><%= text_area_tag :body, "Hola, este correo fue enviado localmente.", rows: 8, required: true %>
+          <label>Documentos adjuntos</label><%= file_field_tag "attachments[]", multiple: true %>
           <div style="margin-top:16px"><%= submit_tag "Enviar", class: "button" %></div>
         <% end %>
       </section>
@@ -32,11 +34,13 @@
             <p class="muted" style="font-size:12px"><%= mail.from&.join(", ") %> → <%= mail.to&.join(", ") %></p>
             <% if mail.cc.present? %><p class="muted" style="font-size:12px">CC: <%= mail.cc.join(", ") %></p><% end %>
             <p style="white-space:pre-wrap"><%= truncate(mail.text_part&.body&.decoded || mail.body.decoded, length: 500) %></p>
+            <% if mail.attachments.any? %><p class="muted" style="font-size:12px">Adjuntos: <%= mail.attachments.map(&:filename).join(", ") %></p><% end %>
             <div class="raw-id"><%= message.external_id %> · <%= message.thread_id %></div>
             <details class="reply-box">
               <summary>Responder en este hilo</summary>
-              <%= form_with url: mailbox_message_reply_path(@mailbox.email, message.external_id), class: "reply-form" do %>
+              <%= form_with url: mailbox_message_reply_path(@mailbox.email, message.external_id), class: "reply-form", html: { multipart: true } do %>
                 <%= text_area_tag :body, "Respuesta local desde #{@mailbox.email}", rows: 4, required: true %>
+                <%= file_field_tag "attachments[]", multiple: true %>
                 <%= submit_tag "Responder", class: "button" %>
               <% end %>
             </details>
